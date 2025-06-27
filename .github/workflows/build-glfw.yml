@@ -46,6 +46,16 @@ jobs:
           echo "Patch applied"
           cat share/ext/glfw/patch_3.4
 
+      - name: Download SDKs
+        uses: actions/download-artifact@v4
+        with:
+          name: local_sdks
+          path: local_sdks
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ env.WIN32_SDK_RUN_ID }}
+      - shell: bash
+        run: ls -l local_sdks
+
       - name: Set Windows SDK version
         shell: bash
         run: |
