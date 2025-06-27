@@ -1,0 +1,25 @@
+[bootstrap]
+main_collection = /example/example.collectionc
+
+[script]
+shared_state = 1
+
+[display]
+width = 960
+height = 640
+
+[project]
+title = glfw_patch
+
+[library]
+include_dirs = glfw_patch
+
+[input]
+game_binding = /builtins/input/all.input_bindingc
+
+[physics]
+type = 2D
+use_fixed_timestep = 1
+max_fixed_timesteps = 0
+debug = 1
+

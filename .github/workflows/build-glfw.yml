@@ -1,0 +1,75 @@
+name: Build GLFW
+
+on:
+  workflow_dispatch:
+
+env:
+  DM_PACKAGES_URL: ./local_sdks
+  BUILD_BRANCH: 1.10.2
+  # Settings / Secrets and variables / Actions / Variables (tab) -> 
+  #   New repository variable -> 
+  #   `WIN32_SDK_RUN_ID` = copy-paste from the run id of the `package-win32-sdk.yml` run, i.e.
+  #   "https://github.com/example/repo/actions/runs/12397740775" <- 12397740775 is the run id
+  WIN32_SDK_RUN_ID: ${{ vars.WIN32_SDK_RUN_ID }}
+  VERSION_WINDOWS_SDK_10: 10.0.26100.0
+  VERSION_WINDOWS_MSVC_2022: 14.44.35207
+
+jobs:
+  build-windows:
+    strategy:
+      matrix:
+        platform: [x86_64-win32]
+    runs-on: windows-2022
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      - name: Checkout Defold
+        uses: actions/checkout@v4
+        with:
+          repository: defold/defold
+          ref: ${{env.BUILD_BRANCH}}
+
+      - name: Checkout patch
+        uses: actions/checkout@v4
+        with:
+          path: patch
+
+      - name: Apply patch
+        shell: bash
+        run: |
+          set -e
+          cat patch/patch_glfw >> share/ext/glfw/patch_3.4
+          echo "Patch applied"
+          cat share/ext/glfw/patch_3.4
+
+      - name: Set Windows SDK version
+        shell: bash
+        run: |
+          sed -i 's/VERSION_WINDOWS_SDK_10=".+"/VERSION_WINDOWS_SDK_10="${{env.VERSION_WINDOWS_SDK_10}}"/g' build_tools/sdk.py
+          sed -i 's/VERSION_WINDOWS_MSVC_2022=".+"/VERSION_WINDOWS_MSVC_2022="${{env.VERSION_WINDOWS_MSVC_2022}}"/g' build_tools/sdk.py
+
+      - name: Install Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.13
+
+      - name: Install dependencies
+        run: ci/ci.sh install --platform=${{ matrix.platform }}
+        shell: bash
+
+      - name: Build GLFW
+        run: |
+          cd share/ext
+          ./build.sh glfw ${{ matrix.platform }}
+        shell: bash
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: glfw-${{ matrix.platform }}
+          path: |
+            share/ext/glfw/source/lib/${{ matrix.platform }}

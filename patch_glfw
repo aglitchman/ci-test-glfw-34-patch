@@ -1,0 +1,21 @@
+diff --git a/src/wgl_context.c b/src/wgl_context.c
+index 8a23ffc412..fbd4b9934c 100644
+--- a/src/wgl_context.c
++++ b/src/wgl_context.c
+@@ -328,7 +328,7 @@ static void swapBuffersWGL(_GLFWwindow* window)
+     if (!window->monitor)
+     {
+         // HACK: Use DwmFlush when desktop composition is enabled on Windows Vista and 7
+-        if (!IsWindows8OrGreater() && IsWindowsVistaOrGreater())
++        if (IsWindowsVistaOrGreater())
+         {
+             BOOL enabled = FALSE;
+ 
+@@ -355,7 +355,7 @@ static void swapIntervalWGL(int interval)
+     {
+         // HACK: Disable WGL swap interval when desktop composition is enabled on Windows
+         //       Vista and 7 to avoid interfering with DWM vsync
+-        if (!IsWindows8OrGreater() && IsWindowsVistaOrGreater())
++        if (IsWindowsVistaOrGreater())
+         {
+             BOOL enabled = FALSE;

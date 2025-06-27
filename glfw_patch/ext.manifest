@@ -1,0 +1,6 @@
+name: "glfw_patch"
+
+platforms:
+    x86_64-win32:
+        context:
+            excludeLibs: [glfw3]
