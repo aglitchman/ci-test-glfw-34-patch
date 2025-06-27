@@ -2,6 +2,9 @@ name: Build GLFW
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   DM_PACKAGES_URL: ./local_sdks
@@ -45,6 +48,7 @@ jobs:
           cat patch/patch_glfw >> share/ext/glfw/patch_3.4
           echo "Patch applied"
           cat share/ext/glfw/patch_3.4
+          sed -i 's/HOST_PLATFORM=\${HOST_UNAME}/HOST_PLATFORM=\${HOST_PLATFORM:-\${HOST_UNAME}}/g' share/ext/common.sh
 
       - name: Download SDKs
         uses: actions/download-artifact@v4
@@ -74,7 +78,7 @@ jobs:
       - name: Build GLFW
         run: |
           cd share/ext
-          ./build.sh glfw ${{ matrix.platform }}
+          HOST_PLATFORM=${{ matrix.platform }} ./build.sh glfw ${{ matrix.platform }}
         shell: bash
 
       - name: Upload Artifact
